@@ -30,8 +30,9 @@ const StoreDashboard: React.FC = () => {
                 if (!mounted) return;
                 setProducts(p);
                 setOrders(o);
-            } catch (e: any) {
-                addToast(`Nie udało się pobrać danych sklepu: ${e.message || e}`, 'error');
+            } catch (e: unknown) {
+                const message = e instanceof Error ? e.message : String(e);
+                addToast(`Nie udało się pobrać danych sklepu: ${message}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }
