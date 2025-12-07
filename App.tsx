@@ -154,8 +154,7 @@ const AppContent: React.FC = () => {
               <Route path="/strategy/*" element={<StrategyManagementPage />} />
               <Route path="/creative/*" element={<CreativeLabManagementPage />} />
               <Route path="/prometheus/*" element={<PrometheusGenesisPage />} />
-              {/* Fallback for any other marketing pages not explicitly defined */}
-              <Route path="/marketing/*" element={<ComingSoonPage title="Marketing Tool" />} />
+              {/* Fallback for any other marketing pages not explicitly defined - Removed duplicate route */}
 
             </Routes>
           </Suspense>
