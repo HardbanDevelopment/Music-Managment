@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { apiPost } from '../../services/api';
 import { Book } from '../../types';
 
 interface BookWizardProps {
@@ -11,19 +12,34 @@ const BookWizard: React.FC<BookWizardProps> = ({ onComplete, onClose }) => {
     const [author, setAuthor] = useState('');
     const [coverArt, setCoverArt] = useState('');
     const [status, setStatus] = useState<'Published' | 'Draft'>('Draft');
+    const [assetId, setAssetId] = useState('');
+    const [isbn, setIsbn] = useState('');
+    const [publisher, setPublisher] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        onComplete({ 
-            title, 
-            author, 
-            status, 
-            coverArt: coverArt || undefined // Pass undefined if empty to allow default in API
-        });
-        onClose();
+        if (!isFormValid) return;
+        try {
+            const response = await apiPost('/api/prepare-publishing', {
+                asset_id: assetId,
+                isbn,
+                publisher
+            });
+            onComplete({ 
+                ...response.book,
+                title, 
+                author, 
+                status, 
+                coverArt: coverArt || undefined 
+            });
+            onClose();
+        } catch (error) {
+            console.error('Error preparing publishing:', error);
+            // Możesz dodać toast lub obsługę błędu tutaj
+        }
     };
 
-    const isFormValid = title.trim() !== '' && author.trim() !== '';
+    const isFormValid = title.trim() !== '' && author.trim() !== '' && assetId.trim() !== '' && isbn.trim() !== '' && publisher.trim() !== '';
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6 text-white">
@@ -72,6 +88,39 @@ const BookWizard: React.FC<BookWizardProps> = ({ onComplete, onClose }) => {
                         <option value="Draft">Draft</option>
                         <option value="Published">Published</option>
                     </select>
+                </div>
+                <div>
+                    <label htmlFor="asset-id" className="block text-sm font-medium text-gray-300">Asset ID</label>
+                    <input 
+                        id="asset-id"
+                        type="text" 
+                        value={assetId} 
+                        onChange={e => setAssetId(e.target.value)} 
+                        className="w-full mt-1 bg-dark-bg p-3 rounded-md border border-dark-border"
+                        required
+                    />
+                </div>
+                <div>
+                    <label htmlFor="isbn" className="block text-sm font-medium text-gray-300">ISBN</label>
+                    <input 
+                        id="isbn"
+                        type="text" 
+                        value={isbn} 
+                        onChange={e => setIsbn(e.target.value)} 
+                        className="w-full mt-1 bg-dark-bg p-3 rounded-md border border-dark-border"
+                        required
+                    />
+                </div>
+                <div>
+                    <label htmlFor="publisher" className="block text-sm font-medium text-gray-300">Publisher</label>
+                    <input 
+                        id="publisher"
+                        type="text" 
+                        value={publisher} 
+                        onChange={e => setPublisher(e.target.value)} 
+                        className="w-full mt-1 bg-dark-bg p-3 rounded-md border border-dark-border"
+                        required
+                    />
                 </div>
             </div>
             <div className="flex justify-end items-center pt-4 space-x-4">

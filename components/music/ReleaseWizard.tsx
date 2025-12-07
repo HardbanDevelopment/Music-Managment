@@ -1,5 +1,6 @@
 // FIX: This was a placeholder file. Implemented a basic ReleaseWizard component.
 import React, { useState } from 'react';
+import { apiPost } from '../../services/api';
 import { MusicRelease } from '../../types';
 
 interface ReleaseWizardProps {
@@ -12,14 +13,34 @@ const ReleaseWizard: React.FC<ReleaseWizardProps> = ({ onComplete, onClose }) =>
     const [title, setTitle] = useState('');
     const [artist, setArtist] = useState('');
     const [status, setStatus] = useState<'Published' | 'Pending' | 'Draft'>('Draft');
+    const [assetId, setAssetId] = useState('');
+    const [upc, setUpc] = useState('');
+    const [label, setLabel] = useState('');
 
     const handleNext = () => setStep(s => s + 1);
     const handleBack = () => setStep(s => s - 1);
 
-    const handleSubmit = () => {
-        onComplete({ title, artist, status });
-        onClose();
+    const handleSubmit = async () => {
+        try {
+            const response = await apiPost('/api/prepare-distribution', {
+                asset_id: assetId,
+                upc,
+                label
+            });
+            onComplete({ 
+                ...response.release,
+                title,
+                artist,
+                status
+            });
+            onClose();
+        } catch (error) {
+            console.error('Error preparing distribution:', error);
+            // Dodaj obsługę błędu
+        }
     };
+
+    const isStep1Valid = title && artist && assetId && upc && label;
 
     return (
         <div className="space-y-6 text-white">
@@ -34,8 +55,20 @@ const ReleaseWizard: React.FC<ReleaseWizardProps> = ({ onComplete, onClose }) =>
                         <label className="text-sm">Artist Name</label>
                         <input type="text" value={artist} onChange={e => setArtist(e.target.value)} className="w-full mt-1 bg-dark-bg p-2 rounded-md border border-dark-border" />
                     </div>
+                    <div>
+                        <label className="text-sm">Asset ID</label>
+                        <input type="text" value={assetId} onChange={e => setAssetId(e.target.value)} className="w-full mt-1 bg-dark-bg p-2 rounded-md border border-dark-border" />
+                    </div>
+                    <div>
+                        <label className="text-sm">UPC</label>
+                        <input type="text" value={upc} onChange={e => setUpc(e.target.value)} className="w-full mt-1 bg-dark-bg p-2 rounded-md border border-dark-border" />
+                    </div>
+                    <div>
+                        <label className="text-sm">Label</label>
+                        <input type="text" value={label} onChange={e => setLabel(e.target.value)} className="w-full mt-1 bg-dark-bg p-2 rounded-md border border-dark-border" />
+                    </div>
                     <div className="flex justify-end pt-4">
-                        <button onClick={handleNext} disabled={!title || !artist} className="bg-primary-purple py-2 px-6 rounded-lg disabled:opacity-50">Next</button>
+                        <button onClick={handleNext} disabled={!isStep1Valid} className="bg-primary-purple py-2 px-6 rounded-lg disabled:opacity-50">Next</button>
                     </div>
                 </div>
             )}
