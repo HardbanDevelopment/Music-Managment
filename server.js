@@ -8,7 +8,10 @@ dotenv.config();
 const app = express();
 const port = 3000;
 
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 app.use(express.json());
 
 const apiKey = process.env.GEMINI_API_KEY;
