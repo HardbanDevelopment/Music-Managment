@@ -61,7 +61,17 @@ app.get('/api/analytics', (req, res) => {
 
 // AI Helper
 const generate = async (prompt, schema = null, tools = null) => {
-    if (!ai) throw new Error("AI not configured");
+    if (!ai) {
+        // Mock fallback if AI is not configured
+        console.log("AI not configured, returning mock data");
+        if (schema && schema.type === Type.ARRAY) {
+             return JSON.stringify([]);
+        }
+        if (schema && schema.type === Type.OBJECT) {
+             return JSON.stringify({}); // Very basic mock, ideally should be structured
+        }
+        return "This is a mock AI response from the backend because GEMINI_API_KEY is not configured.";
+    }
     const config = {
         responseMimeType: schema ? 'application/json' : 'text/plain',
     };
