@@ -43,20 +43,20 @@ const SocialMediaPage: React.FC = () => {
     const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([]);
 
     const handleToggleConnection = (id: string) => {
-        setPlatforms(prev => prev.map(p => {
-            if (p.id === id) {
-                const newStatus = p.status === 'Connected' ? 'Not Connected' : 'Connected';
-                addToast(`${p.name} ${newStatus === 'Connected' ? 'connected' : 'disconnected'}`, 'success');
-                
-                // If disconnecting, remove from selected platforms if present
-                if (newStatus === 'Not Connected') {
-                    setSelectedPlatformIds(current => current.filter(pid => pid !== id));
-                }
-                
-                return { ...p, status: newStatus };
+        let updatedPlatforms = [...platforms];
+        const index = updatedPlatforms.findIndex(p => p.id === id);
+        if (index !== -1) {
+            const platform = updatedPlatforms[index];
+            const newStatus = platform.status === 'Connected' ? 'Not Connected' : 'Connected';
+            addToast(`${platform.name} ${newStatus === 'Connected' ? 'connected' : 'disconnected'}`, 'success');
+
+            if (newStatus === 'Not Connected') {
+                setSelectedPlatformIds(current => current.filter(pid => pid !== id));
             }
-            return p;
-        }));
+
+            updatedPlatforms[index] = { ...platform, status: newStatus };
+            setPlatforms(updatedPlatforms);
+        }
     };
 
     const handlePlatformSelect = (id: string) => {

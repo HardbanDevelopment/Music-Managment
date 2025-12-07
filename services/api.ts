@@ -1,5 +1,5 @@
 // FIX: This file was a placeholder file. Implemented mock data and API functions, including integration with the Gemini API for AI-powered features.
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
 // FIX: Imported `ActivityStatus` enum to resolve 'Cannot find name' errors.
 import {
     MusicRelease, Artist, AnalyticsData, Book, Author, SmartLink, GeneratedTrack, PressRelease,
@@ -19,7 +19,7 @@ import {
 
 // --- GEMINI API SETUP ---
 // FIX: Initialize GoogleGenAI client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
 const BASE_URL = process.env.BASE_URL || '';
 const USE_MOCKS = (process.env.USE_MOCKS ?? 'false') === 'true';
 
@@ -51,7 +51,7 @@ async function apiPost<T>(path: string, body: unknown): Promise<T> {
 }
 
 
-// --- MOCK DATA ---
+// --- MOCK DATA --- (wyłączone)
 const releases: MusicRelease[] = [
     { id: 'rel-1', title: 'Cosmic Dream', artist: 'Casey Creator', coverArt: 'https://picsum.photos/seed/cosmic/400/400', status: 'Published', streams: 1250000, revenue: 4500, platforms: 150 },
     { id: 'rel-2', title: 'Midnight City', artist: 'Casey Creator', coverArt: 'https://picsum.photos/seed/midnight/400/400', status: 'Published', streams: 850000, revenue: 2800, platforms: 150 },
@@ -534,7 +534,7 @@ export const generateTextContent = async (prompt: string): Promise<string> => {
             const r = await apiPost<string>('/api/ai/text', { prompt });
             return r as unknown as string;
         }
-        const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+        const response = await (await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'gemini-2.5-flash', contents: prompt }) })).json();
         return response.text;
     } catch (error) {
         console.error("Error generating text content:", error);
@@ -573,8 +573,14 @@ export const getAIInsight = async (contextData: string): Promise<string> => {
             const r = await apiPost<string>('/api/ai/insight', { contextData });
             return r as unknown as string;
         }
-        const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Based on this JSON data for a user dashboard, provide a short, actionable strategic insight (2-3 sentences max). Data: ${contextData}` });
-        return response.text;
+        const r = await apiPost<{ text?: string }>(
+            '/api/generate',
+            {
+                model: 'gemini-2.5-flash',
+                contents: `Based on this JSON data for a user dashboard, provide a short, actionable strategic insight (2-3 sentences max). Data: ${contextData}`
+            }
+        );
+        return (r.text ?? '').trim();
     } catch (error) {
         console.error("Error generating AI insight:", error);
         return "Could not generate an insight at this time. Please check your connection and configuration.";
@@ -588,9 +594,30 @@ export const generateAudienceSegments = async (data: AudienceData): Promise<Audi
             return r;
         }
         const prompt = `Based on the following JSON data about a creator's audience, generate 3 distinct audience segments or personas. For each segment, provide a creative name, a brief description, its size as a percentage of the total audience, 2-3 key characteristics, and a short, actionable marketing insight. Audience data: ${JSON.stringify(data)}`;
-        const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt, config: { responseMimeType: 'application/json', responseSchema: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, description: { type: Type.STRING }, sizePercentage: { type: Type.NUMBER }, keyCharacteristics: { type: Type.ARRAY, items: { type: Type.STRING } }, marketingInsight: { type: Type.STRING } } } } } });
-        const jsonStr = response.text.trim();
-        return JSON.parse(jsonStr);
+        const r = await apiPost<{ text?: string }>(
+            '/api/generate',
+            {
+                model: 'gemini-2.5-flash',
+                contents: prompt,
+                config: {
+                    responseMimeType: 'application/json',
+                    responseSchema: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                name: { type: Type.STRING },
+                                description: { type: Type.STRING },
+                                sizePercentage: { type: Type.NUMBER },
+                                keyCharacteristics: { type: Type.ARRAY, items: { type: Type.STRING } },
+                                marketingInsight: { type: Type.STRING }
+                            }
+                        }
+                    }
+                }
+            }
+        );
+        return JSON.parse(((r.text ?? '') as string).trim());
 
     } catch (error) {
         console.error("Error generating audience segments:", error);
@@ -610,9 +637,30 @@ export const generateGoalSuggestions = async (userRole: Role, userData: unknown)
             return r;
         }
         const prompt = `You are a strategic advisor for a ${userRole === Role.MUSIC_CREATOR ? 'music creator' : 'book author'}. Based on their current data, suggest 3 actionable and specific goals. For each goal, provide a title, a short description, a targetMetric (e.g., "100,000 streams"), and a due date within the next 3 months. User Data: ${JSON.stringify(userData)}`;
-        const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt, config: { responseMimeType: 'application/json', responseSchema: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, description: { type: Type.STRING }, targetMetric: { type: Type.STRING }, dueDate: { type: Type.STRING, description: "Date in YYYY-MM-DD format" } }, required: ["title", "description", "targetMetric", "dueDate"] } } } });
-        const jsonStr = response.text.trim();
-        return JSON.parse(jsonStr);
+        const r = await apiPost<{ text?: string }>(
+            '/api/generate',
+            {
+                model: 'gemini-2.5-flash',
+                contents: prompt,
+                config: {
+                    responseMimeType: 'application/json',
+                    responseSchema: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                title: { type: Type.STRING },
+                                description: { type: Type.STRING },
+                                targetMetric: { type: Type.STRING },
+                                dueDate: { type: Type.STRING, description: "Date in YYYY-MM-DD format" }
+                            },
+                            required: ["title", "description", "targetMetric", "dueDate"]
+                        }
+                    }
+                }
+            }
+        );
+        return JSON.parse(((r.text ?? '') as string).trim());
 
     } catch (error) {
         console.error("Error generating goal suggestions:", error);
@@ -637,7 +685,7 @@ export const analyzeCreativeIdea = async (idea: string, audienceData: AudienceDa
         Identify the top 3 key emotional triggers from this list: Nostalgia, Excitement, Melancholy, Tension, Joy. Provide a score for each (0-100).
         Give 3 concrete, actionable creative suggestions for improvement.
         Return the data as a JSON object.`;
-        const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt, config: { responseMimeType: 'application/json', responseSchema: { type: Type.OBJECT, properties: { ideaSnippet: { type: Type.STRING }, commercialPotential: { type: Type.NUMBER }, keyEmotions: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { emotion: { type: Type.STRING }, score: { type: Type.NUMBER } } } }, creativeSuggestions: { type: Type.ARRAY, items: { type: Type.STRING } } } } } });
+        const response = await (await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'gemini-2.5-flash', contents: prompt, config: { responseMimeType: 'application/json', responseSchema: { type: Type.OBJECT, properties: { ideaSnippet: { type: Type.STRING }, commercialPotential: { type: Type.NUMBER }, keyEmotions: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { emotion: { type: Type.STRING }, score: { type: Type.NUMBER } } } }, creativeSuggestions: { type: Type.ARRAY, items: { type: Type.STRING } } } } } }) })).json();
         const jsonStr = response.text.trim();
         return JSON.parse(jsonStr);
 
@@ -663,14 +711,21 @@ export const getMediaMentions = async (): Promise<MediaMention[] | { error: stri
             const r = await apiGet<MediaMention[]>('/api/media/mentions');
             return r;
         }
-        const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: "Find recent web mentions for the artist 'Casey Creator' and their single 'Cosmic Dream'. Return only the most relevant articles, blogs, or social media posts from the last month.", config: { tools: [{ googleSearch: {} }] } });
+        const r = await apiPost<{ candidates?: any[]; text?: string }>(
+            '/api/generate',
+            {
+                model: 'gemini-2.5-flash',
+                contents: "Find recent web mentions for the artist 'Casey Creator' and their single 'Cosmic Dream'. Return only the most relevant articles, blogs, or social media posts from the last month.",
+                config: { tools: [{ googleSearch: {} }] }
+            }
+        );
 
-        const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+        const groundingChunks = r.candidates?.[0]?.groundingMetadata?.groundingChunks;
         if (!groundingChunks || groundingChunks.length === 0) {
             return [];
         }
 
-        const mentions: MediaMention[] = groundingChunks.map((chunk, index) => ({ id: `mention-${index}-${Date.now()}`, source: new URL(chunk.web.uri).hostname.replace('www.', ''), url: chunk.web.uri, title: chunk.web.title || "Untitled Mention", snippet: response.text.substring(0, 150) + '...', sentiment: 'Positive', publishedAt: new Date().toISOString() }));
+        const mentions: MediaMention[] = groundingChunks.map((chunk, index) => ({ id: `mention-${index}-${Date.now()}`, source: new URL(chunk.web.uri).hostname.replace('www.', ''), url: chunk.web.uri, title: chunk.web.title || "Untitled Mention", snippet: ((r.text ?? '') as string).substring(0, 150) + '...', sentiment: 'Positive', publishedAt: new Date().toISOString() }));
 
         return mentions;
     } catch (error: unknown) {
@@ -693,13 +748,9 @@ export const getCreatorCatalogue = async (userId: string): Promise<CatalogueAsse
 
 export const runCatalogueAudit = async (catalogue: CatalogueAsset[]): Promise<AuditOpportunity[]> => {
     try {
-        if (!USE_MOCKS) {
-            const r = await apiPost<AuditOpportunity[]>('/api/catalogue/audit', { catalogue });
-            return r;
-        }
         const prompt = `You are an expert A&R and marketing strategist. Analyze this creator's back-catalogue and identify up to 3-4 assets with the highest untapped potential for re-monetization or promotion. For each identified asset, provide a "potentialScore" (0-100), a concise "insight" explaining why it has potential (e.g., genre is trending, seasonal relevance), and a list of 2-3 concrete "suggestedActions". Catalogue data: ${JSON.stringify(catalogue)}`;
-        
-        const response = await ai.models.generateContent({
+
+        const r = await apiPost<{ text: string } | { text?: string }>('/api/generate', {
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
@@ -725,7 +776,7 @@ export const runCatalogueAudit = async (catalogue: CatalogueAsset[]): Promise<Au
             }
         });
 
-        const jsonStr = response.text.trim();
+        const jsonStr = (r as { text?: string }).text?.trim() || '';
         return JSON.parse(jsonStr);
 
     } catch (error) {
@@ -740,10 +791,6 @@ export const runCatalogueAudit = async (catalogue: CatalogueAsset[]): Promise<Au
 
 export const runSalesForecast = async (asset: CatalogueAsset, period: number): Promise<SalesForecast> => {
     try {
-        if (!USE_MOCKS) {
-            const r = await apiPost<SalesForecast>('/api/forecast/sales', { asset, period });
-            return r;
-        }
         const unit = asset.type === 'Music' ? 'streams' : 'sales';
         const prompt = `You are a data scientist specializing in media sales forecasting. Analyze this creative asset: ${JSON.stringify(asset)}. 
         Generate a realistic sales/stream forecast for the next ${period} months. 
@@ -751,7 +798,7 @@ export const runSalesForecast = async (asset: CatalogueAsset, period: number): P
         Also provide a total projectedUnits and projectedRevenue for the period, a confidence level ('High', 'Medium', or 'Low'), and a short strategic 'insight'.
         Assume a revenue of $0.0035 per stream for music, and $4.50 per sale for books.`;
 
-        const response = await ai.models.generateContent({
+        const r = await apiPost<{ text: string } | { text?: string }>('/api/generate', {
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
@@ -781,7 +828,7 @@ export const runSalesForecast = async (asset: CatalogueAsset, period: number): P
             }
         });
         
-        const jsonResult = JSON.parse(response.text.trim());
+        const jsonResult = JSON.parse(((r as { text?: string }).text || '').trim());
         return {
             ...jsonResult,
             assetId: asset.id,
@@ -815,13 +862,9 @@ export const runSalesForecast = async (asset: CatalogueAsset, period: number): P
 
 export const generateCampaignStrategy = async (asset: CatalogueAsset, platform: string): Promise<CampaignStrategy> => {
     try {
-        if (!USE_MOCKS) {
-            const r = await apiPost<CampaignStrategy>('/api/campaign/strategy', { asset, platform });
-            return r;
-        }
         const prompt = `You are an expert marketing strategist for independent creators. A ${asset.type === 'Music' ? 'musician' : 'author'} wants to launch a marketing campaign for their asset titled "${asset.title}" by ${asset.authorOrArtist}. The campaign will primarily target ${platform}. Create a comprehensive 4-week marketing strategy as a JSON object. The strategy should include a catchy campaign title, a description of the target audience, the key messaging, 3-4 content pillars, a 4-week timeline with specific activities for each week, and 2 sample posts for the target platform, including an image prompt for one of them.`;
         
-        const response = await ai.models.generateContent({
+        const r = await apiPost<{ text: string } | { text?: string }>('/api/generate', {
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
@@ -860,7 +903,7 @@ export const generateCampaignStrategy = async (asset: CatalogueAsset, platform: 
             }
         });
 
-        const jsonStr = response.text.trim();
+        const jsonStr = ((r as { text?: string }).text || '').trim();
         return JSON.parse(jsonStr);
 
     } catch (error) {
@@ -887,10 +930,6 @@ export const generateCampaignStrategy = async (asset: CatalogueAsset, platform: 
 
 export const findMarketOpportunities = async (catalogue: CatalogueAsset[], role: Role): Promise<{ trends: MarketTrend[], opportunities: CreativeOpportunity[] }> => {
     try {
-        if (!USE_MOCKS) {
-            const r = await apiPost<{ trends: MarketTrend[], opportunities: CreativeOpportunity[] }>('/api/market/opportunities', { catalogue, role });
-            return r;
-        }
         const creatorType = role === Role.MUSIC_CREATOR ? 'music creator specializing in genres like synthwave and chillwave' : 'book author specializing in fantasy and sci-fi';
         const prompt = `You are a market trend analyst for a ${creatorType}. Their current catalogue is: ${JSON.stringify(catalogue.map(c => c.title))}. 
         Using Google Search, find 3 current (within the last 3-6 months), specific, and verifiable market trends for their niche on platforms like TikTok, YouTube, Instagram, or Goodreads. 
@@ -898,60 +937,63 @@ export const findMarketOpportunities = async (catalogue: CatalogueAsset[], role:
         Each opportunity must directly relate to one of the trends you found. Provide a strong rationale for why the opportunity fits the trend and the creator's brand.
         For music, an AI snippet could be a lyrical theme or a description of a musical motif. For books, it could be a character archetype or a plot hook.`;
         
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                tools: [{ googleSearch: {} }],
-                responseMimeType: 'application/json',
-                responseSchema: {
-                    type: Type.OBJECT,
-                    properties: {
-                        trends: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    id: { type: Type.STRING },
-                                    platform: { type: Type.STRING },
-                                    description: { type: Type.STRING }
+        const r = await apiPost<{ text?: string; candidates?: any[] }>(
+            '/api/generate',
+            {
+                model: 'gemini-2.5-flash',
+                contents: prompt,
+                config: {
+                    tools: [{ googleSearch: {} }],
+                    responseMimeType: 'application/json',
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            trends: {
+                                type: Type.ARRAY,
+                                items: {
+                                    type: Type.OBJECT,
+                                    properties: {
+                                        id: { type: Type.STRING },
+                                        platform: { type: Type.STRING },
+                                        description: { type: Type.STRING }
+                                    }
                                 }
-                            }
-                        },
-                        opportunities: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    id: { type: Type.STRING },
-                                    title: { type: Type.STRING },
-                                    description: { type: Type.STRING },
-                                    relatedTrendId: { type: Type.STRING },
-                                    assetSuggestion: {
-                                        type: Type.OBJECT,
-                                        properties: {
-                                            type: { type: Type.STRING },
-                                            format: { type: Type.STRING }
-                                        }
-                                    },
-                                    aiSnippet: {
-                                        type: Type.OBJECT,
-                                        properties: {
-                                            type: { type: Type.STRING },
-                                            content: { type: Type.STRING }
-                                        }
-                                    },
-                                    rationale: { type: Type.STRING }
+                            },
+                            opportunities: {
+                                type: Type.ARRAY,
+                                items: {
+                                    type: Type.OBJECT,
+                                    properties: {
+                                        id: { type: Type.STRING },
+                                        title: { type: Type.STRING },
+                                        description: { type: Type.STRING },
+                                        relatedTrendId: { type: Type.STRING },
+                                        assetSuggestion: {
+                                            type: Type.OBJECT,
+                                            properties: {
+                                                type: { type: Type.STRING },
+                                                format: { type: Type.STRING }
+                                            }
+                                        },
+                                        aiSnippet: {
+                                            type: Type.OBJECT,
+                                            properties: {
+                                                type: { type: Type.STRING },
+                                                content: { type: Type.STRING }
+                                            }
+                                        },
+                                        rationale: { type: Type.STRING }
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        });
+        );
 
-        const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
-        const jsonResponse = JSON.parse(response.text.trim());
+        const groundingChunks = r.candidates?.[0]?.groundingMetadata?.groundingChunks;
+        const jsonResponse = JSON.parse(((r.text ?? '') as string).trim());
         
         if (groundingChunks && groundingChunks.length > 0) {
             jsonResponse.trends.forEach((trend: Record<string, unknown>, index: number) => {
@@ -994,48 +1036,50 @@ export const getCommunityAnalytics = async (): Promise<CommunityAnalytics> => {
 
         Fan Interaction Data: ${JSON.stringify(fanInteractions)}`;
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                responseMimeType: 'application/json',
-                responseSchema: {
-                    type: Type.OBJECT,
-                    properties: {
-                        communityPulseSummary: { type: Type.STRING },
-                        topFans: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    fanId: { type: Type.STRING },
-                                    fanName: { type: Type.STRING },
-                                    fanAvatar: { type: Type.STRING },
-                                    reason: { type: Type.STRING },
-                                    suggestedAction: { type: Type.STRING }
+        const r = await apiPost<{ text?: string }>(
+            '/api/generate',
+            {
+                model: 'gemini-2.5-flash',
+                contents: prompt,
+                config: {
+                    responseMimeType: 'application/json',
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            communityPulseSummary: { type: Type.STRING },
+                            topFans: {
+                                type: Type.ARRAY,
+                                items: {
+                                    type: Type.OBJECT,
+                                    properties: {
+                                        fanId: { type: Type.STRING },
+                                        fanName: { type: Type.STRING },
+                                        fanAvatar: { type: Type.STRING },
+                                        reason: { type: Type.STRING },
+                                        suggestedAction: { type: Type.STRING }
+                                    }
                                 }
-                            }
-                        },
-                        engagementOpportunities: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    interactionId: { type: Type.STRING },
-                                    fanName: { type: Type.STRING },
-                                    fanAvatar: { type: Type.STRING },
-                                    comment: { type: Type.STRING },
-                                    aiReplySuggestion: { type: Type.STRING }
+                            },
+                            engagementOpportunities: {
+                                type: Type.ARRAY,
+                                items: {
+                                    type: Type.OBJECT,
+                                    properties: {
+                                        interactionId: { type: Type.STRING },
+                                        fanName: { type: Type.STRING },
+                                        fanAvatar: { type: Type.STRING },
+                                        comment: { type: Type.STRING },
+                                        aiReplySuggestion: { type: Type.STRING }
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        });
+        );
 
-        const jsonStr = response.text.trim();
-        return JSON.parse(jsonStr);
+        return JSON.parse(((r.text ?? '') as string).trim());
 
     } catch (error) {
         console.error("Error generating community analytics:", error);
@@ -1069,49 +1113,51 @@ export const getBrandReport = async (keywords: BrandKeyword[]): Promise<BrandRep
         2.  An "archetype" object identifying the brand's primary Jungian archetype (e.g., The Creator, The Rebel, The Sage), with a brief description and a few keywords that define it.
         3.  A "swot" analysis object with concise lists of Strengths, Weaknesses, Opportunities, and Threats based on the public discourse.`;
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                tools: [{ googleSearch: {} }],
-                responseMimeType: 'application/json',
-                responseSchema: {
-                    type: Type.OBJECT,
-                    properties: {
-                        sentiment: {
-                            type: Type.OBJECT,
-                            properties: {
-                                positiveScore: { type: Type.NUMBER },
-                                neutralScore: { type: Type.NUMBER },
-                                negativeScore: { type: Type.NUMBER },
-                                keyPositiveTopics: { type: Type.ARRAY, items: { type: Type.STRING } },
-                                keyNegativeTopics: { type: Type.ARRAY, items: { type: Type.STRING } }
-                            }
-                        },
-                        archetype: {
-                            type: Type.OBJECT,
-                            properties: {
-                                name: { type: Type.STRING },
-                                description: { type: Type.STRING },
-                                keywords: { type: Type.ARRAY, items: { type: Type.STRING } }
-                            }
-                        },
-                        swot: {
-                            type: Type.OBJECT,
-                            properties: {
-                                strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
-                                weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } },
-                                opportunities: { type: Type.ARRAY, items: { type: Type.STRING } },
-                                threats: { type: Type.ARRAY, items: { type: Type.STRING } }
+        const r = await apiPost<{ text?: string }>(
+            '/api/generate',
+            {
+                model: 'gemini-2.5-flash',
+                contents: prompt,
+                config: {
+                    tools: [{ googleSearch: {} }],
+                    responseMimeType: 'application/json',
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            sentiment: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    positiveScore: { type: Type.NUMBER },
+                                    neutralScore: { type: Type.NUMBER },
+                                    negativeScore: { type: Type.NUMBER },
+                                    keyPositiveTopics: { type: Type.ARRAY, items: { type: Type.STRING } },
+                                    keyNegativeTopics: { type: Type.ARRAY, items: { type: Type.STRING } }
+                                }
+                            },
+                            archetype: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    name: { type: Type.STRING },
+                                    description: { type: Type.STRING },
+                                    keywords: { type: Type.ARRAY, items: { type: Type.STRING } }
+                                }
+                            },
+                            swot: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
+                                    weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } },
+                                    opportunities: { type: Type.ARRAY, items: { type: Type.STRING } },
+                                    threats: { type: Type.ARRAY, items: { type: Type.STRING } }
+                                }
                             }
                         }
                     }
                 }
             }
-        });
+        );
 
-        const jsonStr = response.text.trim();
-        const reportData = JSON.parse(jsonStr);
+        const reportData = JSON.parse(((r.text ?? '') as string).trim());
         
         return {
             ...reportData,

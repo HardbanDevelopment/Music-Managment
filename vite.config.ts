@@ -1,6 +1,7 @@
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
@@ -8,12 +9,13 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        proxy: {
+          '/api': 'http://localhost:3001'
+        }
       },
-      plugins: [react()],
+      plugins: [react(), tailwindcss()],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.BASE_URL': JSON.stringify('http://invalid-backend-url.com'),
+        'process.env.BASE_URL': JSON.stringify('https://jiqskbqtcouyxytpzmoh.supabase.co'),
         'process.env.USE_MOCKS': JSON.stringify(env.USE_MOCKS || 'false')
       },
       resolve: {
