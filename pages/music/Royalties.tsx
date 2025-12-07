@@ -1,7 +1,7 @@
 // FIX: This file was a placeholder. Added page implementation.
 import React from 'react';
 import Card from '../../components/ui/Card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const royaltyData = [
     { month: 'Jan', earnings: 4250 },
@@ -32,7 +32,7 @@ const Royalties: React.FC = () => {
                     <p className="text-4xl font-bold">$125,680</p>
                 </Card>
                 <Card className="p-6 bg-gradient-to-br from-blue-500 to-indigo-500 text-white">
-                    <p className="text-sm">Last Month's Earnings</p>
+                    <p className="text-sm">Last Month&apos;s Earnings</p>
                     <p className="text-4xl font-bold">$6,200</p>
                 </Card>
                 <Card className="p-6 bg-gradient-to-br from-purple-500 to-pink-500 text-white">

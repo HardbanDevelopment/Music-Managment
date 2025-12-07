@@ -25,8 +25,8 @@ const SocialMediaPage: React.FC = () => {
             try {
                 const data = await getSocialPlatforms();
                 if (mounted) setPlatforms(data);
-            } catch (e: any) {
-                addToast(`Nie udało się pobrać platform: ${e.message || e}`, 'error');
+            } catch (e: unknown) {
+                addToast(`Nie udało się pobrać platform: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }

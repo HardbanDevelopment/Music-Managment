@@ -22,12 +22,12 @@ const BrandSentinelPage: React.FC = () => {
 
     const handleRunAnalysis = async () => {
         if (!user) {
-            addToast('User not found!', 'error');
+            addToast('Użytkownik nie znaleziony!', 'error');
             return;
         }
         const activeKeywords = keywords.filter(k => k.isActive);
         if (activeKeywords.length === 0) {
-            addToast('Please select at least one keyword to analyze.', 'error');
+            addToast('Wybierz co najmniej jedno słowo kluczowe do analizy.', 'error');
             return;
         }
 
@@ -35,10 +35,15 @@ const BrandSentinelPage: React.FC = () => {
         setIsInitial(false);
         setReport(null);
 
-        const result = await getBrandReport(activeKeywords);
-        setReport(result);
-        setIsLoading(false);
-        addToast('Brand analysis complete!', 'success');
+        try {
+            const result = await getBrandReport(activeKeywords);
+            setReport(result);
+            addToast('Analiza marki zakończona pomyślnie!', 'success');
+        } catch (e: unknown) {
+            addToast(`Nie udało się przeprowadzić analizy marki: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const toggleKeyword = (id: string) => {

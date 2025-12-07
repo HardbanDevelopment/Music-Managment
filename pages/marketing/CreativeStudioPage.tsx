@@ -14,10 +14,17 @@ const TextGenerator = () => {
         if (!topic) return;
         setIsLoading(true);
         setGeneratedContent('');
-        const prompt = `Create a ${platform} post with an ${tone} tone about ${topic}.`;
-        const content = await generateTextContent(prompt);
-        setGeneratedContent(content);
-        setIsLoading(false);
+        try {
+            const prompt = `Create a ${platform} post with an ${tone} tone about ${topic}.`;
+            const content = await generateTextContent(prompt);
+            setGeneratedContent(content);
+        } catch (e: unknown) {
+            // Assuming addToast is available in this context, or needs to be passed down
+            // For now, just log the error
+            console.error(`Nie udało się wygenerować treści tekstowej: ${(e instanceof Error) ? e.message : String(e)}`);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -77,9 +84,14 @@ const ImageGenerator = () => {
         if (!prompt) return;
         setIsLoading(true);
         setGeneratedImage(null);
-        const imageUrl = await generateAIImage(prompt, style);
-        setGeneratedImage(imageUrl);
-        setIsLoading(false);
+        try {
+            const imageUrl = await generateAIImage(prompt, style);
+            setGeneratedImage(imageUrl);
+        } catch (e: unknown) {
+            console.error(`Nie udało się wygenerować obrazu AI: ${(e instanceof Error) ? e.message : String(e)}`);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (

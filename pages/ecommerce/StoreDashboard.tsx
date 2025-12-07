@@ -18,7 +18,7 @@ const OrderStatusBadge: React.FC<{ status: OrderStatus }> = ({ status }) => {
 
 const StoreDashboard: React.FC = () => {
     const { addToast } = useContext(ToastContext);
-    const [products, setProducts] = useState<any[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
 

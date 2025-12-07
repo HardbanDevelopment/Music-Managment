@@ -25,7 +25,7 @@ const StrategyDisplay: React.FC<{ strategy: CampaignStrategy }> = ({ strategy })
                 <p className="text-sm text-gray-300">{strategy.targetAudience}</p>
             </StrategySectionCard>
             <StrategySectionCard title="Key Messaging" icon={<SharedIcons.Campaigns />}>
-                <p className="text-sm text-gray-300 italic">"{strategy.keyMessaging}"</p>
+                <p className="text-sm text-gray-300 italic">&quot;{strategy.keyMessaging}&quot;</p>
             </StrategySectionCard>
         </div>
 

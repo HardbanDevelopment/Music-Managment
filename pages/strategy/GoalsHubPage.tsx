@@ -86,13 +86,18 @@ const AIGoalSuggestions: React.FC<{ onAdd: (goal: Partial<Goal>) => void }> = ({
     useEffect(() => {
         if (!user) return;
         const fetchSuggestions = async () => {
-            const userData = await getCreatorDashboardData(user.id, user.role) as { stats: unknown };
-            const aiSuggestions = await generateGoalSuggestions(user.role, userData.stats);
-            setSuggestions(aiSuggestions);
-            setIsLoading(false);
-        };
-        fetchSuggestions();
-    }, [user]);
+                try {
+                    const userData = await getCreatorDashboardData(user.id, user.role) as { stats: AnalyticsData };
+                    const aiSuggestions = await generateGoalSuggestions(user.role, userData.stats);
+                    setSuggestions(aiSuggestions);
+                } catch (e: unknown) {
+                    addToast(`Nie udało się pobrać sugestii celów: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            fetchSuggestions();
+    }, [user, addToast]);
 
     if (isLoading) {
         return <div className="h-40 flex items-center justify-center"><SuspenseLoader /></div>;
@@ -131,17 +136,21 @@ const GoalsHubPage: React.FC = () => {
     
 useEffect(() => {
     const fetchGoals = async () => {
-        const fetchedGoals = await getGoals();
-        setGoals(fetchedGoals);
-    };
+            try {
+                const fetchedGoals = await getGoals();
+                setGoals(fetchedGoals);
+            } catch (e: unknown) {
+                addToast(`Nie udało się pobrać celów: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+            }
+        };
     fetchGoals();
-}, []);
+}, [addToast]);
     const [isLoading, setIsLoading] = useState(false);
     
     const handleAddGoal = async (goalData: Partial<Goal>) => {
         const newGoal = await addGoal(goalData);
         setGoals(prev => [newGoal, ...prev]);
-        addToast(`Goal "${newGoal.title}" added!`, 'success');
+        addToast(`Cel "${newGoal.title}" został dodany!`, 'success');
     };
     
     const handleUpdateGoal = (updatedGoal: Goal) => {

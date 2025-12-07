@@ -19,8 +19,8 @@ const AddCampaignModalContent: React.FC<{ onClose: () => void, onCampaignAdded: 
             onCampaignAdded(newCampaign);
             addToast('Campaign created successfully!', 'success');
             onClose();
-        } catch (e: any) {
-            addToast(`Nie udało się utworzyć kampanii: ${e.message || e}`, 'error');
+        } catch (e: unknown) {
+            addToast(`Nie udało się utworzyć kampanii: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
         }
     };
 
@@ -58,8 +58,8 @@ const CampaignsPage: React.FC = () => {
             try {
                 const data = await getCampaigns();
                 if (mounted) setCampaigns(data);
-            } catch (e: any) {
-                addToast(`Nie udało się pobrać kampanii: ${e.message || e}`, 'error');
+            } catch (e: unknown) {
+                addToast(`Nie udało się pobrać kampanii: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }

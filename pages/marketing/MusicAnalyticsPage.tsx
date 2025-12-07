@@ -5,6 +5,7 @@ import GeoChart from '../../components/charts/GeoChart';
 import { getAnalyticsData, getPlaylistPlacements } from '../../services/api';
 import Card from '../../components/ui/Card';
 import { ToastContext } from '../../context/AuthContext';
+import { AnalyticsData } from '../../types';
 
 const COLORS = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 const GENDER_COLORS = ['#8B5CF6', '#3B82F6', '#10B981'];
@@ -12,7 +13,7 @@ const GENDER_COLORS = ['#8B5CF6', '#3B82F6', '#10B981'];
 const MusicAnalyticsPage: React.FC = () => {
     const { user } = useContext(AuthContext);
     const { addToast } = useContext(ToastContext);
-    const [analyticsData, setAnalyticsData] = useState<any | null>(null);
+    const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
     const [playlistPlacements, setPlaylistPlacements] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -26,8 +27,8 @@ const MusicAnalyticsPage: React.FC = () => {
                 if (!mounted) return;
                 setAnalyticsData(analytics);
                 setPlaylistPlacements(placements);
-            } catch (e: any) {
-                addToast(`Nie udało się pobrać danych analitycznych: ${e.message || e}`, 'error');
+            } catch (e: unknown) {
+                addToast(`Nie udało się pobrać danych analitycznych: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }

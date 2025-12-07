@@ -13,9 +13,13 @@ const AddLinkModalContent: React.FC<{ onClose: () => void, onLinkAdded: (newLink
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (name.trim() && originalUrl.trim()) {
-            const newLink = await addSmartLink({ name, originalUrl, type });
-            onLinkAdded(newLink);
-            onClose();
+            try {
+                const newLink = await addSmartLink({ name, originalUrl, type });
+                onLinkAdded(newLink);
+                onClose();
+            } catch (e: unknown) {
+                console.error(`Nie udało się dodać linku: ${(e instanceof Error) ? e.message : String(e)}`);
+            }
         }
     };
 
@@ -31,7 +35,7 @@ const AddLinkModalContent: React.FC<{ onClose: () => void, onLinkAdded: (newLink
             </div>
                 <div>
                 <label htmlFor="link-type" className="block text-sm font-medium text-gray-300">Link Type</label>
-                <select id="link-type" value={type} onChange={(e) => setType(e.target.value as any)} className="mt-1 block w-full bg-dark-bg border-dark-border rounded-md p-3">
+                <select id="link-type" value={type} onChange={(e) => setType(e.target.value as 'Pre-Save' | 'Bio-Link' | 'Single')} className="mt-1 block w-full bg-dark-bg border-dark-border rounded-md p-3">
                     <option>Pre-Save</option>
                     <option>Bio-Link</option>
                     <option>Single</option>
@@ -51,8 +55,12 @@ const SmartLinksPage: React.FC = () => {
 
     useEffect(() => {
         const fetchLinks = async () => {
-            const fetchedLinks = await getSmartLinks();
-            setLinks(fetchedLinks);
+            try {
+                const fetchedLinks = await getSmartLinks();
+                setLinks(fetchedLinks);
+            } catch (e: unknown) {
+                console.error(`Nie udało się pobrać linków: ${(e instanceof Error) ? e.message : String(e)}`);
+            }
         };
         fetchLinks();
     }, []);

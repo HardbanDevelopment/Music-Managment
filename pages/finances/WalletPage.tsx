@@ -19,7 +19,7 @@ const TransactionStatusBadge: React.FC<{ status: TransactionStatus }> = ({ statu
 
 const WalletPage: React.FC = () => {
     const { addToast } = useContext(ToastContext);
-    const [walletData, setWalletData] = useState<any | null>(null);
+    const [walletData, setWalletData] = useState<WalletData | null>(null);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -32,8 +32,8 @@ const WalletPage: React.FC = () => {
                 if (!mounted) return;
                 setWalletData(wallet);
                 setTransactions(txs);
-            } catch (e: any) {
-                addToast(`Nie udało się pobrać danych finansowych: ${e.message || e}`, 'error');
+            } catch (e: unknown) {
+                addToast(`Nie udało się pobrać danych finansowych: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }

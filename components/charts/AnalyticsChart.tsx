@@ -14,9 +14,9 @@ const COLORS = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 const AnalyticsCharts: React.FC<AnalyticsChartProps> = ({ userId, role }) => {
     const { addToast } = useContext(ToastContext);
     const [loading, setLoading] = useState(true);
-    const [musicData, setMusicData] = useState<any | null>(null);
-    const [bookSalesData, setBookSalesData] = useState<any[]>([]);
-    const [books, setBooks] = useState<any[]>([]);
+    const [musicData, setMusicData] = useState<AnalyticsData | null>(null);
+const [bookSalesData, setBookSalesData] = useState<{ month: string; amazon: number; apple: number; kobo: number }[]>([]);
+const [books, setBooks] = useState<Book[]>([]);
 
     useEffect(() => {
         let mounted = true;

@@ -26,8 +26,8 @@ const Orders: React.FC = () => {
             try {
                 const data = await getOrders();
                 if (mounted) setOrders(data);
-            } catch (e: any) {
-                addToast(`Nie udało się pobrać zamówień: ${e.message || e}`, 'error');
+            } catch (e: unknown) {
+                addToast(`Nie udało się pobrać zamówień: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
             }
         })();
         return () => { mounted = false; };

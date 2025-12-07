@@ -10,8 +10,25 @@ const COLORS = ['#6366F1', '#3B82F6', '#10B981'];
 
 const AuthorDetail: React.FC = () => {
     const { authorId } = useParams<{ authorId: string }>();
-    const author = getAuthorById(authorId || '');
+    const [author, setAuthor] = useState<Author | null>(null);
+    const [loadingAuthor, setLoadingAuthor] = useState(true);
     const [salesData, setSalesData] = useState<{ month: string; amazon: number; apple: number; kobo: number; }[]>([]);
+
+    useEffect(() => {
+        const fetchAuthor = async () => {
+            setLoadingAuthor(true);
+            try {
+                const fetchedAuthor = await getAuthorById(authorId || '');
+                setAuthor(fetchedAuthor);
+            } catch (e) {
+                console.error("Failed to fetch author:", e);
+                setAuthor(null);
+            } finally {
+                setLoadingAuthor(false);
+            }
+        };
+        fetchAuthor();
+    }, [authorId]);
     useEffect(() => {
         const fetchSales = async () => {
             const data = await getBookSalesData();
@@ -20,6 +37,10 @@ const AuthorDetail: React.FC = () => {
         fetchSales();
     }, []);
     const [activeTab, setActiveTab] = useState('overview');
+
+    if (loadingAuthor) {
+        return <div className="text-center py-20 text-gray-400">Loading author details...</div>;
+    }
 
     if (!author) {
         return (

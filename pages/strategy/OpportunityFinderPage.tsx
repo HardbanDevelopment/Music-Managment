@@ -27,13 +27,18 @@ const OpportunityFinderPage: React.FC = () => {
         setOpportunities([]);
         setTrends([]);
 
-        const catalogue = await getCreatorCatalogue(user.id);
-        const { trends: newTrends, opportunities: newOpportunities } = await findMarketOpportunities(catalogue, user.role);
+        try {
+            const catalogue = await getCreatorCatalogue(user.id);
+            const { trends: newTrends, opportunities: newOpportunities } = await findMarketOpportunities(catalogue, user.role);
 
-        setTrends(newTrends);
-        setOpportunities(newOpportunities);
-        setIsLoading(false);
-        addToast('Market scan complete!', 'success');
+            setTrends(newTrends);
+            setOpportunities(newOpportunities);
+            addToast('Skanowanie rynku zakończone pomyślnie!', 'success');
+        } catch (e: unknown) {
+            addToast(`Nie udało się zeskanować rynku: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const InitialState = () => (
@@ -64,7 +69,7 @@ const OpportunityFinderPage: React.FC = () => {
                     <div className="flex justify-between items-center mb-6">
                         <div>
                             <h2 className="text-2xl font-bold text-white">Market Scan Results</h2>
-                            <p className="text-gray-400">Here's what our AI found for you.</p>
+                            <p className="text-gray-400">Here&apos;s what our AI found for you.</p>
                         </div>
                         <button
                             onClick={handleRunScan}

@@ -33,26 +33,31 @@ async function apiGet<T>(path: string): Promise<T> {
       throw new Error(msg);
     }
     return res.json();
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('API GET error:', error);
     return {} as T;
   }
 }
 
 async function apiPost<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const ct = res.headers.get('content-type') || '';
-    const errBody = ct.includes('application/json') ? await res.json().catch(() => ({})) : await res.text().catch(() => '');
-    const msg = typeof body === 'object' && body && 'message' in body ? (body as { message: string }).message : String(body || res.statusText || res.status);
-    throw new Error(msg);
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const ct = res.headers.get('content-type') || '';
+      const errBody = ct.includes('application/json') ? await res.json().catch(() => ({})) : await res.text().catch(() => '');
+      const msg = typeof errBody === 'object' && errBody && 'message' in errBody ? (errBody as { message: string }).message : String(errBody || res.statusText || res.status);
+      throw new Error(msg);
+    }
+    return res.json();
+  } catch (error: unknown) {
+    console.error('API POST error:', error);
+    return {} as T;
   }
-  return res.json();
 }
 
 
@@ -84,12 +89,12 @@ const smartLinks: SmartLink[] = [
     { id: 'sl-2', name: 'Casey Creator Bio', shortUrl: 'fan.link/casey', originalUrl: 'https://casey.com', type: 'Bio-Link', clicks: 8800, conversions: 0 },
 ];
 
-let pressReleases: PressRelease[] = [
+const pressReleases: PressRelease[] = [
     { id: 'pr-1', title: 'Casey Creator Announces "Cosmic Dream" Single', status: 'Sent', sentDate: '2024-05-15', openRate: 45 },
     { id: 'pr-2', title: 'Pat Publisher\'s "The Silent Forest" Hits Bestseller List', status: 'Draft', sentDate: null, openRate: 0 },
 ];
 
-let contacts: Contact[] = [
+const contacts: Contact[] = [
     { id: 'ct-1', name: 'John Doe', email: 'john.doe@musicblog.com', role: 'Press', list: 'Press & Media', dateAdded: '2024-01-10' },
 ];
 
@@ -97,7 +102,7 @@ const campaigns: Campaign[] = [
     { id: 'camp-1', name: 'Cosmic Dream Release Campaign', status: 'Active', budget: 5000, startDate: '2024-05-01', endDate: '2024-06-01', channels: ['Spotify Ads', 'Instagram'] },
 ];
 
-let contentLibrary: Content[] = [
+const contentLibrary: Content[] = [
     { id: 'cl-1', title: 'Cosmic Dream Instagram Post', type: 'Social Post', status: 'Published', content: 'My new single is out now!', lastModified: '2024-05-20' },
 ];
 
@@ -263,7 +268,10 @@ export const getArtists = async () => {
     if (!USE_MOCKS) return apiGet<Artist[]>('/api/artists');
     return artists;
 };
-export const getArtistById = (id: string) => artists.find(a => a.id === id);
+export const getArtistById = async (id: string): Promise<Artist | undefined> => {
+    if (!USE_MOCKS) return apiGet<Artist | undefined>(`/api/artists/${id}`);
+    return artists.find(a => a.id === id);
+};
 export const addArtist = async (name: string) => {
     if (!USE_MOCKS) return apiPost<Artist>('/api/artists', { name });
     const newArtist: Artist = {
@@ -308,7 +316,10 @@ export const getAuthors = async () => {
     if (!USE_MOCKS) return apiGet<Author[]>('/api/authors');
     return authors;
 };
-export const getAuthorById = (id: string) => authors.find(a => a.id === id);
+export const getAuthorById = async (id: string): Promise<Author | undefined> => {
+    if (!USE_MOCKS) return apiGet<Author | undefined>(`/api/authors/${id}`);
+    return authors.find(a => a.id === id);
+};
 export const addAuthor = async (name: string) => {
     if (!USE_MOCKS) return apiPost<Author>('/api/authors', { name });
     const newAuthor: Author = {

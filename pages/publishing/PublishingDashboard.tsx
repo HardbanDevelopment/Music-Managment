@@ -1,6 +1,7 @@
 
 
 import React, { useEffect, useState, useContext } from 'react';
+import { Book, Author } from '../../types';
 import { getPublishingData, getBookSalesData } from '../../services/api';
 import Card from '../../components/ui/Card';
 import BookCard from '../../components/publishing/BookCard';
@@ -10,9 +11,9 @@ import { ToastContext } from '../../context/AuthContext';
 
 const PublishingDashboard: React.FC = () => {
     const { addToast } = useContext(ToastContext);
-    const [books, setBooks] = useState<any[]>([]);
-    const [authors, setAuthors] = useState<any[]>([]);
-    const [salesData, setSalesData] = useState<any[]>([]);
+    const [books, setBooks] = useState<Book[]>([]);
+    const [authors, setAuthors] = useState<Author[]>([]);
+    const [salesData, setSalesData] = useState<{ month: string; amazon: number; apple: number; kobo: number }[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -27,8 +28,8 @@ const PublishingDashboard: React.FC = () => {
                 setBooks(bks);
                 setAuthors(auths);
                 setSalesData(sales);
-            } catch (e: any) {
-                addToast(`Nie udało się pobrać danych wydawniczych: ${e.message || e}`, 'error');
+            } catch (e: unknown) {
+                addToast(`Nie udało się pobrać danych wydawniczych: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }
