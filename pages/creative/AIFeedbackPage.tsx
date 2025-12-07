@@ -35,8 +35,9 @@ const AIFeedbackPage: React.FC = () => {
             setHistory(prev => [newFeedback, ...prev]);
             addToast('Creative analysis complete!', 'success');
             setIdea('');
-        } catch (e: any) {
-            addToast(`Nie udało się przeanalizować pomysłu: ${e.message || e}`, 'error');
+        } catch (e: unknown) {
+            const message = e instanceof Error ? e.message : String(e);
+            addToast(`Nie udało się przeanalizować pomysłu: ${message}`, 'error');
         } finally {
             setIsLoading(false);
         }

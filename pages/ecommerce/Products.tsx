@@ -52,8 +52,9 @@ const Products: React.FC = () => {
             try {
                 const data = await getProducts();
                 if (mounted) setProducts(data);
-            } catch (e: any) {
-                addToast(`Nie udało się pobrać produktów: ${e.message || e}`, 'error');
+            } catch (e: unknown) {
+                const message = e instanceof Error ? e.message : String(e);
+                addToast(`Nie udało się pobrać produktów: ${message}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }

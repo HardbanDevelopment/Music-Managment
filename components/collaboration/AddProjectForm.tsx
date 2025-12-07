@@ -34,8 +34,9 @@ const AddProjectForm: React.FC<AddProjectFormProps> = ({ onProjectAdded, onClose
             setDescription('');
             setRoles('');
             onClose();
-        } catch (e: any) {
-            addToast(`Nie udało się utworzyć projektu: ${e.message || e}`, 'error');
+        } catch (e: unknown) {
+            const message = e instanceof Error ? e.message : String(e);
+            addToast(`Nie udało się utworzyć projektu: ${message}`, 'error');
         }
     };
 

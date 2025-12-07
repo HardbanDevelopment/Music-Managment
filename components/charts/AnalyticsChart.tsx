@@ -32,8 +32,9 @@ const AnalyticsCharts: React.FC<AnalyticsChartProps> = ({ userId, role }) => {
                     if (!mounted) return;
                     setMusicData(analytics);
                 }
-            } catch (e: any) {
-                addToast(`Nie udało się pobrać danych analitycznych: ${e.message || e}`, 'error');
+            } catch (e: unknown) {
+                const message = e instanceof Error ? e.message : String(e);
+                addToast(`Nie udało się pobrać danych analitycznych: ${message}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }
@@ -84,7 +85,13 @@ const AnalyticsCharts: React.FC<AnalyticsChartProps> = ({ userId, role }) => {
     }
     
     // Default for Music Creator and Admin
-    const data = musicData!;
+    if (!musicData) {
+        return <div className="h-48 w-full flex items-center justify-center text-gray-300">Ładowanie danych lub błąd – sprawdź połączenie z backendem</div>;
+    }
+    const data = musicData;
+    if (!data.streamsTrend || !data.revenueBreakdown || !data.platformRevenue) {
+        return <div className="h-48 w-full flex items-center justify-center text-gray-300">Brak danych analitycznych – sprawdź połączenie z backendem</div>;
+    }
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-dark-card border border-dark-border rounded-2xl p-6 shadow-lg">

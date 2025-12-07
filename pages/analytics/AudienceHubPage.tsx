@@ -84,8 +84,9 @@ const AudienceHubPage: React.FC = () => {
                 setAudienceData(data);
                 const aiSegments = await generateAudienceSegments(data);
                 setSegments(aiSegments);
-            } catch (e: any) {
-                addToast(`Nie udało się pobrać danych odbiorców: ${e.message || e}`, 'error');
+            } catch (e: unknown) {
+                const message = e instanceof Error ? e.message : String(e);
+                addToast(`Nie udało się pobrać danych odbiorców: ${message}`, 'error');
             } finally {
                 setIsLoading(false);
             }

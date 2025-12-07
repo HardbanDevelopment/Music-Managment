@@ -19,8 +19,9 @@ const ProjectFinderPage: React.FC = () => {
             try {
                 const data = await getCollaborationProjects();
                 if (mounted) setProjects(data);
-            } catch (e: any) {
-                addToast(`Nie udało się pobrać projektów: ${e.message || e}`, 'error');
+            } catch (e: unknown) {
+                const message = e instanceof Error ? e.message : String(e);
+                addToast(`Nie udało się pobrać projektów: ${message}`, 'error');
             }
         })();
         return () => { mounted = false; };

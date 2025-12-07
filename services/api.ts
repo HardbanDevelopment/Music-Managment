@@ -24,17 +24,22 @@ const BASE_URL = process.env.BASE_URL || '';
 const USE_MOCKS = (process.env.USE_MOCKS ?? 'false') === 'true';
 
 async function apiGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, { credentials: 'include' });
-  if (!res.ok) {
-    const ct = res.headers.get('content-type') || '';
-    const body = ct.includes('application/json') ? await res.json().catch(() => ({})) : await res.text().catch(() => '');
-    const msg = typeof body === 'object' && body && 'message' in body ? (body as any).message : String(body || res.statusText || res.status);
-    throw new Error(msg);
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, { credentials: 'include' });
+    if (!res.ok) {
+      const ct = res.headers.get('content-type') || '';
+      const body = ct.includes('application/json') ? await res.json().catch(() => ({})) : await res.text().catch(() => '');
+      const msg = typeof body === 'object' && body && 'message' in body ? (body as { message: string }).message : String(body || res.statusText || res.status);
+      throw new Error(msg);
+    }
+    return res.json();
+  } catch (error) {
+    console.error('API GET error:', error);
+    return {} as T;
   }
-  return res.json();
 }
 
-async function apiPost<T>(path: string, body: any): Promise<T> {
+async function apiPost<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -74,7 +79,7 @@ const authors: Author[] = [
     { id: 'author-001', name: 'Pat Publisher', avatar: 'https://i.pravatar.cc/150?u=pat-publisher', booksPublished: 2, totalSales: 23700, totalRevenue: 103000, books },
 ];
 
-let smartLinks: SmartLink[] = [
+const smartLinks: SmartLink[] = [
     { id: 'sl-1', name: 'Cosmic Dream Pre-Save', shortUrl: 'fan.link/cosmic', originalUrl: 'spotify:track:123', type: 'Pre-Save', clicks: 12450, conversions: 4500 },
     { id: 'sl-2', name: 'Casey Creator Bio', shortUrl: 'fan.link/casey', originalUrl: 'https://casey.com', type: 'Bio-Link', clicks: 8800, conversions: 0 },
 ];
@@ -88,7 +93,7 @@ let contacts: Contact[] = [
     { id: 'ct-1', name: 'John Doe', email: 'john.doe@musicblog.com', role: 'Press', list: 'Press & Media', dateAdded: '2024-01-10' },
 ];
 
-let campaigns: Campaign[] = [
+const campaigns: Campaign[] = [
     { id: 'camp-1', name: 'Cosmic Dream Release Campaign', status: 'Active', budget: 5000, startDate: '2024-05-01', endDate: '2024-06-01', channels: ['Spotify Ads', 'Instagram'] },
 ];
 
@@ -96,11 +101,11 @@ let contentLibrary: Content[] = [
     { id: 'cl-1', title: 'Cosmic Dream Instagram Post', type: 'Social Post', status: 'Published', content: 'My new single is out now!', lastModified: '2024-05-20' },
 ];
 
-let products: Product[] = [
+const products: Product[] = [
     { id: 'prod-1', name: 'Cosmic Dream T-Shirt', price: 25, image: 'https://picsum.photos/seed/tshirt/400/400', category: 'Apparel', sales: 150, stock: 50 },
 ];
 
-let orders: Order[] = [
+const orders: Order[] = [
     { id: 'ord-1', customerName: 'Jane Smith', date: '2024-05-21', total: 25.00, status: 'Delivered', items: [{ productId: 'prod-1', quantity: 1 }] },
 ];
 
@@ -137,7 +142,7 @@ const audienceData: AudienceData = {
     }
 };
 
-let goals: Goal[] = [
+const goals: Goal[] = [
     { 
         id: 'goal-1', 
         title: "Increase 'Cosmic Dream' streams", 
@@ -170,7 +175,7 @@ let goals: Goal[] = [
     }
 ];
 
-let collaborationProjects: CollaborationProject[] = [
+const collaborationProjects: CollaborationProject[] = [
     {
         id: 'collab-1',
         title: 'Seeking Vocalist for Chillwave Track',
@@ -213,7 +218,7 @@ let collaborationProjects: CollaborationProject[] = [
     }
 ];
 
-let creativeFeedbackHistory: CreativeFeedback[] = [
+const creativeFeedbackHistory: CreativeFeedback[] = [
     {
         id: 'cf-1',
         ideaSnippet: "A new song called 'Starlight Echoes' about finding a lost connection through time.",
@@ -545,7 +550,7 @@ export const generateTextContent = async (prompt: string): Promise<string> => {
 export const generateAIImage = async (prompt: string, style: string): Promise<string> => {
     if (!USE_MOCKS) {
         const r = await apiPost<string>('/api/ai/image', { prompt, style });
-        return r as unknown as string;
+        return r;
     }
     return new Promise(resolve => {
         setTimeout(() => {
@@ -603,7 +608,7 @@ export const generateAudienceSegments = async (data: AudienceData): Promise<Audi
     }
 };
 
-export const generateGoalSuggestions = async (userRole: Role, userData: any): Promise<Partial<Goal>[]> => {
+export const generateGoalSuggestions = async (userRole: Role, userData: unknown): Promise<Partial<Goal>[]> => {
     try {
         if (!USE_MOCKS) {
             const r = await apiPost<Partial<Goal>[]>('/api/ai/goals-suggestions', { userRole, userData });
@@ -673,10 +678,14 @@ export const getMediaMentions = async (): Promise<MediaMention[] | { error: stri
         const mentions: MediaMention[] = groundingChunks.map((chunk, index) => ({ id: `mention-${index}-${Date.now()}`, source: new URL(chunk.web.uri).hostname.replace('www.', ''), url: chunk.web.uri, title: chunk.web.title || "Untitled Mention", snippet: response.text.substring(0, 150) + '...', sentiment: 'Positive', publishedAt: new Date().toISOString() }));
 
         return mentions;
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error fetching media mentions:", error);
         // FIX: Provide a more generic error as per guidelines, assuming API key is handled via environment.
-        return { error: `An error occurred while searching for mentions: ${error.message}` };
+        let errorMsg = 'Unknown error';
+        if (error instanceof Error) {
+            errorMsg = error.message;
+        }
+        return { error: `An error occurred while searching for mentions: ${errorMsg}` };
     }
 };
 
@@ -950,15 +959,15 @@ export const findMarketOpportunities = async (catalogue: CatalogueAsset[], role:
         const jsonResponse = JSON.parse(response.text.trim());
         
         if (groundingChunks && groundingChunks.length > 0) {
-            jsonResponse.trends.forEach((trend: any, index: number) => {
+            jsonResponse.trends.forEach((trend: Record<string, unknown>, index: number) => {
                 const source = groundingChunks[index % groundingChunks.length]?.web;
                 if (source) {
-                    trend.source = { title: source.title || "Web Source", uri: source.uri };
+                    (trend as { source: { title: string; uri: string } }).source = { title: source.title || "Web Source", uri: source.uri };
                 }
             });
         }
         
-        return jsonResponse;
+        return jsonResponse as { trends: MarketTrend[]; opportunities: CreativeOpportunity[] };
 
     } catch (error) {
         console.error("Error finding market opportunities:", error);
