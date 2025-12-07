@@ -14,7 +14,7 @@ const MusicAnalyticsPage: React.FC = () => {
     const { user } = useContext(AuthContext);
     const { addToast } = useContext(ToastContext);
     const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
-    const [playlistPlacements, setPlaylistPlacements] = useState<any[]>([]);
+    const [playlistPlacements, setPlaylistPlacements] = useState<PlaylistPlacement[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {

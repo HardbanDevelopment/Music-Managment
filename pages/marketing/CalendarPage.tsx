@@ -16,8 +16,8 @@ const CalendarPage: React.FC = () => {
             try {
                 const events = await getCalendarEvents();
                 if (mounted) setAllEvents(events);
-            } catch (e: any) {
-                addToast(`Nie udało się pobrać kalendarza: ${e.message || e}`, 'error');
+            } catch (e: unknown) {
+                addToast(`Nie udało się pobrać kalendarza: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }
