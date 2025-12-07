@@ -5,7 +5,7 @@ import { CatalogueAsset, SalesForecast } from '../../types';
 import { AuthContext, ToastContext } from '../../context/AuthContext';
 import SuspenseLoader from '../../components/ui/SuspenseLoader';
 import { SharedIcons } from '../../components/common/Icons';
-import { ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Area, AreaChart } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Area, AreaChart } from 'recharts';
 
 const ForecastingPage: React.FC = () => {
     const { user } = useContext(AuthContext);
@@ -32,7 +32,7 @@ const ForecastingPage: React.FC = () => {
 
     const handleGenerateForecast = async () => {
         if (!selectedAssetId) {
-            addToast('Wybierz zasób do prognozowania.', 'error');
+            addToast('Please select an asset to forecast.', 'error');
             return;
         }
         setIsLoading(true);
@@ -44,7 +44,7 @@ const ForecastingPage: React.FC = () => {
             setForecast(result);
             addToast('Sales forecast generated successfully!', 'success');
         } else {
-            addToast('Nie można znaleźć wybranego zasobu.', 'error');
+            addToast('Could not find the selected asset.', 'error');
         }
 
         setIsLoading(false);
@@ -121,7 +121,7 @@ const ForecastingPage: React.FC = () => {
                     </div>
                     <Card className="p-6">
                         <h3 className="text-xl font-bold mb-4 text-white">
-                            Forecast for &quot;{forecast.assetTitle}&quot; (Next {forecast.forecastPeriod} Months)
+                            Forecast for "{forecast.assetTitle}" (Next {forecast.forecastPeriod} Months)
                         </h3>
                         <ResponsiveContainer width="100%" height={400}>
                             <AreaChart data={forecast.data}>

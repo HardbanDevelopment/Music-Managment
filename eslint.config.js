@@ -20,18 +20,5 @@ export default tseslint.config(
         version: 'detect',
       },
     },
-  },
-  {
-    files: ['server.js'],
-    languageOptions: {
-      ecmaVersion: 2020,
-      sourceType: 'module',
-    },
-    languageOptions: {
-      globals: {
-        node: true,
-        console: true,
-      },
-    },
-  } // End of server.js configuration
+  }
 );

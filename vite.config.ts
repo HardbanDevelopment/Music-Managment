@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.BASE_URL': JSON.stringify(env.BASE_URL || 'http://localhost:5000'), // Zmień na poprawny backend URL
+        'process.env.BASE_URL': JSON.stringify('http://invalid-backend-url.com'),
         'process.env.USE_MOCKS': JSON.stringify(env.USE_MOCKS || 'false')
       },
       resolve: {

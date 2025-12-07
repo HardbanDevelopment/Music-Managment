@@ -19,8 +19,8 @@ const AddContentModalContent: React.FC<{ onClose: () => void, onContentAdded: (n
                 onContentAdded(newContent);
                 addToast('Content created successfully!', 'success');
                 onClose();
-            } catch (e: unknown) {
-                addToast(`Nie udało się dodać treści: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+            } catch (e: any) {
+                addToast(`Nie udało się dodać treści: ${e.message || e}`, 'error');
             }
         }
     };
@@ -33,7 +33,7 @@ const AddContentModalContent: React.FC<{ onClose: () => void, onContentAdded: (n
             </div>
             <div>
                 <label className="block text-sm font-medium text-gray-300">Content Type</label>
-                <select value={type} onChange={e => setType(e.target.value as 'Social Post' | 'Blog Article' | 'Ad Copy' | 'Email')} className="mt-1 block w-full bg-dark-bg border-dark-border rounded-md p-3">
+                <select value={type} onChange={e => setType(e.target.value as any)} className="mt-1 block w-full bg-dark-bg border-dark-border rounded-md p-3">
                     <option>Social Post</option>
                     <option>Blog Article</option>
                     <option>Ad Copy</option>
@@ -72,8 +72,8 @@ const ContentLibraryPage: React.FC = () => {
             try {
                 const data = await getContentLibrary();
                 if (mounted) setContent(data);
-            } catch (e: unknown) {
-                addToast(`Nie udało się pobrać biblioteki treści: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+            } catch (e: any) {
+                addToast(`Nie udało się pobrać biblioteki treści: ${e.message || e}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }

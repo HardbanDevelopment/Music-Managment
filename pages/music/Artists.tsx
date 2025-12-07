@@ -16,8 +16,8 @@ const AddArtistForm: React.FC<{ onArtistAdded: (artist: Artist) => void }> = ({ 
                 const newArtist = await addArtist(name);
                 onArtistAdded(newArtist);
                 addToast('Artist added successfully!', 'success');
-            } catch (e: unknown) {
-    addToast(`Nie udało się dodać artysty: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+            } catch (e: any) {
+                addToast(`Nie udało się dodać artysty: ${e.message || e}`, 'error');
             }
             setName('');
         }
@@ -48,8 +48,8 @@ const Artists: React.FC = () => {
             try {
                 const data = await getArtists();
                 if (mounted) setArtists(data);
-            } catch (e: unknown) {
-    addToast(`Nie udało się pobrać listy artystów: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+            } catch (e: any) {
+                addToast(`Nie udało się pobrać listy artystów: ${e.message || e}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }

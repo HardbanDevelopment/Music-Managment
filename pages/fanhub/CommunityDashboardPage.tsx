@@ -3,7 +3,7 @@ import Card from '../../components/ui/Card';
 import { getCommunityAnalytics } from '../../services/api';
 import { CommunityAnalytics } from '../../types';
 import SuspenseLoader from '../../components/ui/SuspenseLoader';
-
+import { SharedIcons } from '../../components/common/Icons';
 import CommunityPulseCard from '../../components/fanhub/CommunityPulseCard';
 import TopFanCard from '../../components/fanhub/TopFanCard';
 import EngagementOpportunityCard from '../../components/fanhub/EngagementOpportunityCard';

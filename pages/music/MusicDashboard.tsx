@@ -10,9 +10,9 @@ import { ToastContext } from '../../context/AuthContext';
 
 const MusicDashboard: React.FC = () => {
     const { addToast } = useContext(ToastContext);
-    const [releases, setReleases] = useState<MusicRelease[]>([]);
-    const [artists, setArtists] = useState<Artist[]>([]);
-    const [streamsTrend, setStreamsTrend] = useState<{ name: string; streams: number }[]>([]);
+    const [releases, setReleases] = useState([] as ReturnType<typeof Array.prototype.slice> & any);
+    const [artists, setArtists] = useState([] as ReturnType<typeof Array.prototype.slice> & any);
+    const [streamsTrend, setStreamsTrend] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -25,8 +25,8 @@ const MusicDashboard: React.FC = () => {
                 setReleases(music.releases);
                 setArtists(music.artists);
                 setStreamsTrend(analytics.streamsTrend);
-            } catch (e: unknown) {
-                addToast(`Nie udało się pobrać danych muzycznych: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+            } catch (e: any) {
+                addToast(`Nie udało się pobrać danych muzycznych: ${e.message || e}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }

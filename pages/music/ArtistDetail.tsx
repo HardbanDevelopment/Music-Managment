@@ -3,12 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getArtistById, getArtistContracts, getAnalyticsData } from '../../services/api';
-import { Artist, ArtistContract, AnalyticsData } from '../../types';
 import Card from '../../components/ui/Card';
 import ReleaseCard from '../../components/music/ReleaseCard';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line, Legend } from 'recharts';
 import Tabs from '../../components/ui/Tabs';
-import { ToastContext } from '../../context/AuthContext';
 
 import SuspenseLoader from '../../components/ui/SuspenseLoader';
 
@@ -16,31 +14,25 @@ const COLORS = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 
 const ArtistDetail: React.FC = () => {
     const { artistId } = useParams<{ artistId: string }>();
-    const { addToast } = useContext(ToastContext);
-const [artist, setArtist] = useState<Artist | null>(null);
-const [contracts, setContracts] = useState<ArtistContract[]>([]);
-const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+const [artist, setArtist] = useState(null);
+const [contracts, setContracts] = useState([]);
+const [analytics, setAnalytics] = useState(null);
 const [loading, setLoading] = useState(true);
 const [activeTab, setActiveTab] = useState('overview');
 
 useEffect(() => {
     const fetchData = async () => {
-        try {
-            const fetchedArtist = await getArtistById(artistId || '');
-            if (!fetchedArtist) {
-                setLoading(false);
-                return;
-            }
-            const fetchedContracts = await getArtistContracts(artistId || '');
-            const fetchedAnalytics = await getAnalyticsData();
-            setArtist(fetchedArtist);
-            setContracts(fetchedContracts);
-            setAnalytics(fetchedAnalytics);
+        const fetchedArtist = await getArtistById(artistId || '');
+        if (!fetchedArtist) {
             setLoading(false);
-        } catch (e: unknown) {
-            addToast(`Nie udało się pobrać szczegółów artysty: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
-            setLoading(false);
+            return;
         }
+        const fetchedContracts = await getArtistContracts(artistId || '');
+        const fetchedAnalytics = await getAnalyticsData();
+        setArtist(fetchedArtist);
+        setContracts(fetchedContracts);
+        setAnalytics(fetchedAnalytics);
+        setLoading(false);
     };
     fetchData();
 }, [artistId]);

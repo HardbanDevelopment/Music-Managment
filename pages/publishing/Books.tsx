@@ -17,8 +17,8 @@ const Books: React.FC = () => {
             try {
                 const data = await getPublishingData();
                 if (mounted) setBooks(data.books);
-            } catch (e: unknown) {
-                addToast(`Nie udało się pobrać książek: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+            } catch (e: any) {
+                addToast(`Nie udało się pobrać książek: ${e.message || e}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }
@@ -31,8 +31,8 @@ const Books: React.FC = () => {
             const newBook = await addBook(bookData);
             setBooks(prev => [newBook, ...prev]);
             addToast('Book created successfully!', 'success');
-        } catch (e: unknown) {
-            addToast(`Nie udało się utworzyć książki: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+        } catch (e: any) {
+            addToast(`Nie udało się utworzyć książki: ${e.message || e}`, 'error');
         }
     };
     

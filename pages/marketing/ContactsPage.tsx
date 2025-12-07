@@ -20,8 +20,8 @@ const AddContactModalContent: React.FC<{ onClose: () => void, onContactAdded: (c
                 onContactAdded(newContact);
                 addToast('Contact created successfully!', 'success');
                 onClose();
-            } catch (e: unknown) {
-                addToast(`Nie udało się dodać kontaktu: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+            } catch (e: any) {
+                addToast(`Nie udało się dodać kontaktu: ${e.message || e}`, 'error');
             }
         }
     };
@@ -55,8 +55,8 @@ const ContactsPage: React.FC = () => {
             try {
                 const data = await getContacts();
                 if (mounted) setContacts(data);
-            } catch (e: unknown) {
-                addToast(`Nie udało się pobrać kontaktów: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+            } catch (e: any) {
+                addToast(`Nie udało się pobrać kontaktów: ${e.message || e}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }

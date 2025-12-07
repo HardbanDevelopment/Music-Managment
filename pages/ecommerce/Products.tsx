@@ -19,8 +19,8 @@ const AddProductForm: React.FC<{ onProductAdded: (product: Product) => void, onC
             onProductAdded(newProduct);
             addToast('Product created successfully!', 'success');
             onClose();
-        } catch (e: unknown) {
-            addToast(`Nie udało się utworzyć produktu: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+        } catch (err: any) {
+            addToast(`Nie udało się utworzyć produktu: ${err.message || err}`, 'error');
         }
     };
 

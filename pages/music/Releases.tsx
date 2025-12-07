@@ -20,8 +20,8 @@ const Releases: React.FC = () => {
             try {
                 const data = await getMusicData();
                 if (mounted) setReleases(data.releases);
-            } catch (e: unknown) {
-                addToast(`Nie udało się pobrać listy wydań: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+            } catch (e: any) {
+                addToast(`Nie udało się pobrać listy wydań: ${e.message || e}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }
@@ -34,8 +34,8 @@ const Releases: React.FC = () => {
             const newRelease = await addRelease(releaseData);
             setReleases(prev => [newRelease, ...prev]);
             addToast('Release created successfully!', 'success');
-        } catch (e: unknown) {
-            addToast(`Nie udało się utworzyć wydania: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+        } catch (e: any) {
+            addToast(`Nie udało się utworzyć wydania: ${e.message || e}`, 'error');
         }
     };
 

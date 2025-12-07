@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Book } from '../../types';
 import Card from '../../components/ui/Card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { getBookSalesData, getPublishingData } from '../../services/api';
@@ -7,8 +6,8 @@ import { ToastContext } from '../../context/AuthContext';
 
 const Sales: React.FC = () => {
     const { addToast } = useContext(ToastContext);
-    const [salesData, setSalesData] = useState<{ month: string; amazon: number; apple: number; kobo: number }[]>([]);
-    const [books, setBooks] = useState<Book[]>([]);
+    const [salesData, setSalesData] = useState<any[]>([]);
+    const [books, setBooks] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -19,8 +18,8 @@ const Sales: React.FC = () => {
                 if (!mounted) return;
                 setSalesData(sales);
                 setBooks(pub.books);
-            } catch (e: unknown) {
-                addToast(`Nie udało się pobrać danych sprzedaży: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+            } catch (e: any) {
+                addToast(`Nie udało się pobrać danych sprzedaży: ${e.message || e}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }

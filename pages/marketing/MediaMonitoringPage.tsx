@@ -33,8 +33,8 @@ const MediaMonitoringPage: React.FC = () => {
                 } else {
                     setMentions(result);
                 }
-            } catch (e: unknown) {
-                setError(`An unexpected error occurred: ${(e instanceof Error) ? e.message : String(e)}`);
+            } catch (e) {
+                setError("An unexpected error occurred.");
                  setMentions([]);
             } finally {
                 setIsLoading(false);
@@ -70,7 +70,7 @@ const MediaMonitoringPage: React.FC = () => {
              return (
                  <div className="text-center py-20">
                      <p className="text-2xl font-bold text-white">No Mentions Found</p>
-                    <p className="text-gray-400 mt-2">We couldn&apos;t find any recent mentions. Check back later!</p>
+                    <p className="text-gray-400 mt-2">We couldn't find any recent mentions. Check back later!</p>
                 </div>
             );
         }

@@ -16,8 +16,8 @@ const AddAuthorForm: React.FC<{ onAuthorAdded: (author: Author) => void }> = ({ 
                 const newAuthor = await addAuthor(name);
                 onAuthorAdded(newAuthor);
                 addToast('Author added successfully!', 'success');
-            } catch (e: unknown) {
-                addToast(`Nie udało się dodać autora: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+            } catch (e: any) {
+                addToast(`Nie udało się dodać autora: ${e.message || e}`, 'error');
             }
             setName('');
         }
@@ -47,8 +47,8 @@ const Authors: React.FC = () => {
             try {
                 const data = await getAuthors();
                 if (mounted) setAuthors(data);
-            } catch (e: unknown) {
-                addToast(`Nie udało się pobrać autorów: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+            } catch (e: any) {
+                addToast(`Nie udało się pobrać autorów: ${e.message || e}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }

@@ -1,7 +1,7 @@
 
 // FIX: This file was a placeholder. Added the main App component with routing, layout, and context providers. This resolves module resolution errors in other files that import it.
 // FIX: Refactored dashboard routing to use a single '/home' route with a consistent header provided by DashboardPage. Removed redundant '/admin' and '/dashboard' routes for clarity and consistency.
-import React, { Suspense, useContext, useState, useCallback, ReactNode, Component } from 'react';
+import React, { Suspense, useContext, useState, useCallback, ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext, ToastContext, Toast } from './context/AuthContext';
 import { Role, User } from './types';

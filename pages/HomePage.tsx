@@ -21,56 +21,40 @@ const HomePage: React.FC = () => {
     useEffect(() => {
         if (!user) return;
 
-        const fetchData = async () => {
-          try {
-            let data;
-            if (user.role === Role.ADMIN) {
-              data = await getAdminDashboardData();
-            } else {
-              data = await getCreatorDashboardData(user.id, user.role);
-            }
-            if (!data || !data.stats) {
-              setStats([]);
-              setActivities([]);
-              return;
-            }
-
-            if (user.role === Role.ADMIN) {
-              setStats([
+        let data;
+        if (user.role === Role.ADMIN) {
+            data = getAdminDashboardData();
+            setStats([
                 { title: 'Total Revenue', value: `$${(data.stats.totalRevenue / 1000).toFixed(0)}k`, trend: '+5.2%', icon: <SharedIcons.Analytics />, description: 'last 30 days', color: 'bg-primary-purple/20' },
                 { title: 'Total Streams', value: `${(data.stats.totalStreams / 1000000).toFixed(1)}M`, trend: '+12.1%', icon: <SharedIcons.Music />, description: 'last 30 days', color: 'bg-primary-blue/20' },
-                { title: 'Active Artists', value: `${data.stats.activeArtists || 0}`, trend: '+2', icon: <SharedIcons.Contacts />, description: 'this month', color: 'bg-success-green/20' },
-                { title: 'Active Authors', value: `${data.stats.activeAuthors || 0}`, trend: '+1', icon: <SharedIcons.Publishing />, description: 'this month', color: 'bg-warning-yellow/20' }
-              ]);
-              setActivities(data.activities || []);
-            } else if (user.role === Role.MUSIC_CREATOR) {
-              setStats([
-                { title: 'Monthly Listeners', value: `${(data.stats.monthlyListeners / 1000000).toFixed(1)}M`, trend: '+8%', icon: <SharedIcons.Analytics />, description: 'last 30 days', color: 'bg-primary-purple/20' },
-                { title: 'Total Streams', value: `${(data.stats.totalStreams / 1000000).toFixed(1)}M`, trend: '+15%', icon: <SharedIcons.Music />, description: 'all time', color: 'bg-primary-blue/20' },
-              ]);
-              setActivities(data.activities || []);
+                { title: 'Active Artists', value: `${data.stats.activeArtists}`, trend: '+2', icon: <SharedIcons.Contacts />, description: 'this month', color: 'bg-success-green/20' },
+                { title: 'Active Authors', value: `${data.stats.activeAuthors}`, trend: '+1', icon: <SharedIcons.Publishing />, description: 'this month', color: 'bg-warning-yellow/20' }
+            ]);
+            setActivities(data.activities);
+        } else {
+            data = getCreatorDashboardData(user.id, user.role);
+            if (user.role === Role.MUSIC_CREATOR) {
+                setStats([
+                    { title: 'Monthly Listeners', value: `${(data.stats.monthlyListeners / 1000000).toFixed(1)}M`, trend: '+8%', icon: <SharedIcons.Analytics />, description: 'last 30 days', color: 'bg-primary-purple/20' },
+                    { title: 'Total Streams', value: `${(data.stats.totalStreams / 1000000).toFixed(1)}M`, trend: '+15%', icon: <SharedIcons.Music />, description: 'all time', color: 'bg-primary-blue/20' },
+                ]);
             } else if (user.role === Role.BOOK_AUTHOR) {
-              setStats([
-                { title: 'Total Sales', value: `${(data.stats.totalSales || 0).toLocaleString()}`, trend: '+120', icon: <SharedIcons.Publishing />, description: 'last 30 days', color: 'bg-success-green/20' },
-                { title: 'Total Revenue', value: `$${(data.stats.totalRevenue / 1000).toFixed(0)}k`, trend: '+$2.1k', icon: <SharedIcons.Analytics />, description: 'last 30 days', color: 'bg-primary-purple/20' },
-              ]);
-              setActivities(data.activities || []);
+                 setStats([
+                    { title: 'Total Sales', value: `${(data.stats.totalSales).toLocaleString()}`, trend: '+120', icon: <SharedIcons.Publishing />, description: 'last 30 days', color: 'bg-success-green/20' },
+                    { title: 'Total Revenue', value: `$${(data.stats.totalRevenue / 1000).toFixed(0)}k`, trend: '+$2.1k', icon: <SharedIcons.Analytics />, description: 'last 30 days', color: 'bg-primary-purple/20' },
+                ]);
             }
-
+             setActivities(data.activities || []);
+        }
+        
+        const fetchInsight = async () => {
             setIsLoadingInsight(true);
             const aiInsight = await getAIInsight(JSON.stringify(data.stats));
             setInsight(aiInsight);
             setIsLoadingInsight(false);
-          } catch (error) {
-            console.error('Error fetching dashboard data:', error);
-            setStats([]);
-            setActivities([]);
-            setInsight('Nie udało się pobrać wglądu AI. Spróbuj ponownie później.');
-            setIsLoadingInsight(false);
-          }
         };
+        fetchInsight();
 
-        fetchData();
     }, [user]);
 
     if (!user) return <div>Loading...</div>;

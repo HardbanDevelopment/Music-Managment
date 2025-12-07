@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Store } from '../../types';
 import Card from '../../components/ui/Card';
 import { getPublishingStores } from '../../services/api';
 import { ToastContext } from '../../context/AuthContext';
@@ -12,7 +11,7 @@ const StatusIndicator: React.FC<{ status: string }> = ({ status }) => {
 
 const Stores: React.FC = () => {
     const { addToast } = useContext(ToastContext);
-    const [stores, setStores] = useState<Store[]>([]);
+    const [stores, setStores] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -21,8 +20,8 @@ const Stores: React.FC = () => {
             try {
                 const data = await getPublishingStores();
                 if (mounted) setStores(data);
-            } catch (e: unknown) {
-                addToast(`Nie udało się pobrać sklepów: ${(e instanceof Error) ? e.message : String(e)}`, 'error');
+            } catch (e: any) {
+                addToast(`Nie udało się pobrać sklepów: ${e.message || e}`, 'error');
             } finally {
                 if (mounted) setLoading(false);
             }

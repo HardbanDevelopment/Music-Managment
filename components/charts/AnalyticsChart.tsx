@@ -14,9 +14,9 @@ const COLORS = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 const AnalyticsCharts: React.FC<AnalyticsChartProps> = ({ userId, role }) => {
     const { addToast } = useContext(ToastContext);
     const [loading, setLoading] = useState(true);
-    const [musicData, setMusicData] = useState<AnalyticsData | null>(null);
-const [bookSalesData, setBookSalesData] = useState<{ month: string; amazon: number; apple: number; kobo: number }[]>([]);
-const [books, setBooks] = useState<Book[]>([]);
+    const [musicData, setMusicData] = useState<any | null>(null);
+    const [bookSalesData, setBookSalesData] = useState<any[]>([]);
+    const [books, setBooks] = useState<any[]>([]);
 
     useEffect(() => {
         let mounted = true;
@@ -85,13 +85,7 @@ const [books, setBooks] = useState<Book[]>([]);
     }
     
     // Default for Music Creator and Admin
-    if (!musicData) {
-        return <div className="h-48 w-full flex items-center justify-center text-gray-300">Ładowanie danych lub błąd – sprawdź połączenie z backendem</div>;
-    }
-    const data = musicData;
-    if (!data.streamsTrend || !data.revenueBreakdown || !data.platformRevenue) {
-        return <div className="h-48 w-full flex items-center justify-center text-gray-300">Brak danych analitycznych – sprawdź połączenie z backendem</div>;
-    }
+    const data = musicData!;
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-dark-card border border-dark-border rounded-2xl p-6 shadow-lg">
