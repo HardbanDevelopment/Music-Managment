@@ -22,11 +22,14 @@ const ReleaseWizard: React.FC<ReleaseWizardProps> = ({ onComplete, onClose }) =>
 
     const handleSubmit = async () => {
         try {
-            const response = await apiPost('/api/prepare-distribution', {
+            const response = await apiPost<{ release: Partial<MusicRelease> }>(
+                '/api/prepare-distribution',
+                {
                 asset_id: assetId,
                 upc,
                 label
-            });
+                }
+            );
             onComplete({ 
                 ...response.release,
                 title,

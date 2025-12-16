@@ -20,11 +20,14 @@ const BookWizard: React.FC<BookWizardProps> = ({ onComplete, onClose }) => {
         e.preventDefault();
         if (!isFormValid) return;
         try {
-            const response = await apiPost('/api/prepare-publishing', {
+            const response = await apiPost<{ book: Partial<Book>; blurb: string }>(
+                '/api/prepare-publishing',
+                {
                 asset_id: assetId,
                 isbn,
                 publisher
-            });
+                }
+            );
             onComplete({ 
                 ...response.book,
                 title, 

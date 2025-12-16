@@ -2,18 +2,18 @@
   "name": "hardbanrecords-lab",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"node server.js\"",
+    "dev": "concurrently \"vite\" \"node server.cjs\"",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext .ts,.tsx",
+    "lint": "eslint \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@google/genai": "^1.19.0",
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.86.2",
+    "@tailwindcss/postcss": "^4.1.18",
     "cors": "^2.8.5",
     "d3-scale": "^4.0.2",
     "dotenv": "^17.2.3",

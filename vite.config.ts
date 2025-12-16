@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react(), tailwindcss()],
       define: {
-        'process.env.BASE_URL': JSON.stringify('https://jiqskbqtcouyxytpzmoh.supabase.co'),
+        'process.env.BASE_URL': JSON.stringify(''),
         'process.env.USE_MOCKS': JSON.stringify(env.USE_MOCKS || 'false')
       },
       resolve: {
