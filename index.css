@@ -1,8 +1,0 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-.bg-dark-bg { background-color: #0f0f13; }
-.border-dark-border { border-color: #222333; }
-.bg-primary-purple { background-color: #8B5CF6; }
-.bg-primary-blue { background-color: #3B82F6; }
